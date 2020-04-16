@@ -1,0 +1,275 @@
+---
+title: "11_lecture-survey-popcure2019"
+author: "Deidre Jaeger"
+date: "4/15/2020"
+output: html_document
+---
+
+```{r global_options, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, results= TRUE, echo= FALSE)
+
+# echo = false to turn off code
+
+```
+
+
+```{r load-libraries, echo = FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyr) #for pivot
+library(lubridate) # for dates
+library(agricolae) # for the tukey test
+```
+
+```{r load-data, echo = FALSE}
+pre <- read.csv(file = "data/student-data/lecture-2019/PopCURE_PreSurvey_Fa2019-urban-coded.csv",
+                header = T,
+                stringsAsFactors = F,
+                na.strings=c("","NA"))
+
+post <- read.csv(file = "data/student-data/lecture-2019/PopCURE_PostSurvey_Fa2019-urban-coded.csv",
+                 header = T,
+                 stringsAsFactors = F,
+                 na.strings=c("","NA"))
+
+```
+
+```{r tidy-data, results = FALSE}
+#remove the quesiton descriptions
+pre.1 <- pre[-1,]
+
+#remove the quesiton descriptions
+post.1 <- post[-1,]
+
+# add a type column
+pre.1$type <- "pre2019"
+post.1$type <- "post2019"
+
+# check on column nmaes
+colnames(post) == colnames(pre)
+
+# quantitative pre/post is equal to column "Q67_10"
+# subset post to just go up to the pre columns
+pre.2 <- pre.1 %>% 
+  select(1:87, 107) # take te type column too
+
+post.2 <- post.1 %>% 
+  select(1:87, 131) # take the type column too
+
+# check on column nmaes
+colnames(post.2) == colnames(pre.2)
+
+
+# combine into one dataset
+dat.1 <- rbind(post.2, pre.2)
+
+# recode questions as numbers
+str(dat.1)
+
+# if the questions starts with Q4, Q5, Q6 then change to numeric. We are losing the data for 
+pre.post <- dat.1 %>%
+  mutate_each(funs(as.numeric), starts_with("Q4")) %>% 
+  mutate_each(funs(as.numeric), starts_with("Q5")) %>% 
+  mutate_each(funs(as.numeric), starts_with("Q6")) %>% 
+  mutate(Q44 = dat.1$Q44)
+
+str(pre.post)
+
+#### other less efficent ways to select and mutate, but potentially more generic
+
+# dat.t <- dat.1 %>% 
+#   select(Q45_1:Q67_10)
+
+# dat.2 <- dat.1 %>% 
+#   select(starts_with("Q4"), starts_with("Q5"), starts_with("Q6"),-Q44) %>% 
+#   mutate_if(is.character, as.numeric)
+
+# # change the quantitative data to numeric R format
+# dat.2 <- dat.1 %>% 
+#   mutate_at(vars(contains(c("Q4"))), as.numeric)
+
+# recode type and section-code as a factor
+pre.post <- pre.post %>%
+  mutate_each(funs(factor), starts_with("type")) %>% 
+  mutate_each(funs(factor), starts_with("section"))
+
+# change factor order
+pre.post$type <- factor(pre.post$type, levels = c("pre2019","post2019"))
+
+str(pre.post)
+
+
+```
+
+```{r --filter urban-section}
+pre.post.u <- pre.post %>% 
+  filter(section == "urban")
+
+```
+
+
+```{r compare-pre-post, include = FALSE}
+
+# look at question responses for group pre/post, then facet by section-code
+print(pre$Q41_1[1])
+t.test(pre.post$Q45_1 ~ pre.post$type)
+# boxplot(pre.post$Q45_1 ~ pre.post$type, title = print(pre$Q41_1))
+
+ggplot(data = pre.post, aes(x = type, y = Q45_1, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("salmon", "turquoise")) +
+  ggtitle(print(pre$Q41_1[1])) +
+  theme_classic()
+
+t.test(pre.post.u$Q45_1 ~ pre.post.u$type)
+
+ggplot(data = pre.post, aes(x = type, y = Q45_1, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("salmon", "turquoise")) +
+  ggtitle(print(pre$Q41_1[1])) +
+  theme_classic() +
+  facet_wrap( ~ section)
+
+```
+
+
+```{r function-plot-t-test}
+
+pre.post_boxplot_t.test <- function(pre.post.column, pre.column, pre.post.u.col) {
+  
+  #### function to create graphs and run t- tests for the lecture POPCURE survey for 2019
+  ### inputs are 3 column names for the question
+  ## pre.post.column = pre.post$Q45_1
+  # pre.column <- pre$Q45_1
+  # pre.post.u.col <- pre.post.u$Q45_1
+  
+  # outputs are a test with the full set of data, a graph of the full pre/post, a t test of the urban section only, and a graph of the urban section compared to rest of the class
+  
+t <- t.test(pre.post.column ~ pre.post$type)
+
+p.1 <- ggplot(data = pre.post, aes(x = type, y = pre.post.column, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("salmon", "turquoise")) +
+  ggtitle(print(pre.column[1])) +
+  theme_classic()
+
+t.u <- t.test(pre.post.u.col ~ pre.post.u$type)
+
+p.2 <- ggplot(data = pre.post, aes(x = type, y = pre.post.column, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("salmon", "turquoise")) +
+  ggtitle(pre.column[1]) +
+  theme_classic() +
+  facet_wrap( ~ section)
+
+t.test.plots <- list(t, p.1, t.u, p.2)
+return(t.test.plots)
+
+}
+
+# pre.post_boxplot_t.test(pre.post$Q45_1,  pre$Q45_1, pre.post.u$Q45_1)
+# test function
+# pre.post.column = pre.post$Q45_1
+# question_number <- "Q45_1"
+# pre.column <- pre$Q45_1
+# pre.post.u.col <- pre.post.u$Q45_1
+```
+
+```{r graph-all-questions}
+
+# significant diff for urban
+pre.post_boxplot_t.test(pre.post$Q45_3,  pre$Q45_3, pre.post.u$Q45_3)
+pre.post_boxplot_t.test(pre.post$Q41_2,  pre$Q41_2, pre.post.u$Q41_2)
+pre.post_boxplot_t.test(pre.post$Q41_5,  pre$Q41_5, pre.post.u$Q41_5) 
+
+
+# slight increase ,not significant
+pre.post_boxplot_t.test(pre.post$Q45_1,  pre$Q45_1, pre.post.u$Q45_1)
+pre.post_boxplot_t.test(pre.post$Q45_2,  pre$Q45_2, pre.post.u$Q45_2)
+
+pre.post_boxplot_t.test(pre.post$Q41_3,  pre$Q41_3, pre.post.u$Q41_3)  # noticable increase,not significant
+pre.post_boxplot_t.test(pre.post$Q41_4,  pre$Q41_4, pre.post.u$Q41_4)  # noticable increase,not significant
+
+ pre.post_boxplot_t.test(pre.post$Q41_6,  pre$Q41_6, pre.post.u$Q41_6) # noticable increase,not significant
+ pre.post_boxplot_t.test(pre.post$Q47,  pre$Q47, pre.post.u$Q47) # slight increase ,not significant
+ pre.post_boxplot_t.test(pre.post$Q47_1,  pre$Q47_1, pre.post.u$Q47_1)
+ pre.post_boxplot_t.test(pre.post$Q47_2,  pre$Q47_2, pre.post.u$Q47_2)
+ pre.post_boxplot_t.test(pre.post$Q47_3,  pre$Q47_3, pre.post.u$Q47_3)
+ 
+ pre.post_boxplot_t.test(pre.post$Q41_1,  pre$Q41_1, pre.post.u$Q41_1)
+ 
+ pre.post_boxplot_t.test(pre.post$Q49_3,  pre$Q49_3, pre.post.u$Q49_3) 
+ pre.post_boxplot_t.test(pre.post$Q49_5,  pre$Q49_5, pre.post.u$Q49_5)
+ pre.post_boxplot_t.test(pre.post$Q50_3,  pre$Q50_3, pre.post.u$Q50_3) 
+ pre.post_boxplot_t.test(pre.post$Q50_7,  pre$Q50_7, pre.post.u$Q50_7) 
+ pre.post_boxplot_t.test(pre.post$Q50_8,  pre$Q50_8, pre.post.u$Q50_8) 
+ pre.post_boxplot_t.test(pre.post$Q51_1,  pre$Q51_1, pre.post.u$Q51_1) 
+ pre.post_boxplot_t.test(pre.post$Q51_2,  pre$Q51_2, pre.post.u$Q51_2) 
+pre.post_boxplot_t.test(pre.post$Q51_3,  pre$Q51_3, pre.post.u$Q51_3) 
+pre.post_boxplot_t.test(pre.post$Q51_4,  pre$Q51_4, pre.post.u$Q51_4)
+pre.post_boxplot_t.test(pre.post$Q51_5,  pre$Q51_5, pre.post.u$Q51_5) 
+
+pre.post_boxplot_t.test(pre.post$Q45_2.1,  pre$Q45_2.1, pre.post.u$Q45_2.1) # not showing up properly
+pre.post_boxplot_t.test(pre.post$Q45_3.1,  pre$Q45_3.1, pre.post.u$Q45_3.1)
+pre.post_boxplot_t.test(pre.post$Q49_1,  pre$Q49_1, pre.post.u$Q49_1) 
+pre.post_boxplot_t.test(pre.post$Q49_3,  pre$Q49_3, pre.post.u$Q49_3) 
+
+# no sign diff for urban
+
+
+pre.post_boxplot_t.test(pre.post$Q45_4,  pre$Q45_4, pre.post.u$Q45_4)
+pre.post_boxplot_t.test(pre.post$Q45_5,  pre$Q45_5, pre.post.u$Q45_5)
+pre.post_boxplot_t.test(pre.post$Q45_6,  pre$Q45_6, pre.post.u$Q45_6)
+
+
+
+pre.post_boxplot_t.test(pre.post$Q47_4,  pre$Q47_4, pre.post.u$Q47_4) # urban section slightly down
+pre.post_boxplot_t.test(pre.post$Q47_5,  pre$Q47_5, pre.post.u$Q47_5)
+pre.post_boxplot_t.test(pre.post$Q47_6,  pre$Q47_6, pre.post.u$Q47_6)
+pre.post_boxplot_t.test(pre.post$Q48_1,  pre$Q48_1, pre.post.u$Q48_1)
+pre.post_boxplot_t.test(pre.post$Q48_2,  pre$Q48_2, pre.post.u$Q48_2) #urban section slightly down
+pre.post_boxplot_t.test(pre.post$Q48_3,  pre$Q48_3, pre.post.u$Q48_3)
+pre.post_boxplot_t.test(pre.post$Q48_4,  pre$Q48_4, pre.post.u$Q48_4)
+pre.post_boxplot_t.test(pre.post$Q48_5,  pre$Q48_5, pre.post.u$Q48_5)
+pre.post_boxplot_t.test(pre.post$Q48_6,  pre$Q48_6, pre.post.u$Q48_6)
+
+pre.post_boxplot_t.test(pre.post$Q43_1,  pre$Q43_1, pre.post.u$Q43_1)
+pre.post_boxplot_t.test(pre.post$Q43_2,  pre$Q43_2, pre.post.u$Q43_2)
+pre.post_boxplot_t.test(pre.post$Q43_3,  pre$Q43_3, pre.post.u$Q43_3)
+pre.post_boxplot_t.test(pre.post$Q43_4,  pre$Q43_4, pre.post.u$Q43_4)
+pre.post_boxplot_t.test(pre.post$Q43_5,  pre$Q43_5, pre.post.u$Q43_5)
+pre.post_boxplot_t.test(pre.post$Q43_5,  pre$Q43_5, pre.post.u$Q43_5)
+pre.post_boxplot_t.test(pre.post$Q45_1.1,  pre$Q45_1.1, pre.post.u$Q45_1.1)
+
+
+pre.post_boxplot_t.test(pre.post$Q45_4.1,  pre$Q45_4.1, pre.post.u$Q45_4.1) # not showing up properly
+
+pre.post_boxplot_t.test(pre.post$Q49_2,  pre$Q49_2, pre.post.u$Q49_2) 
+
+pre.post_boxplot_t.test(pre.post$Q49_4,  pre$Q49_4, pre.post.u$Q49_4) 
+pre.post_boxplot_t.test(pre.post$Q50_1,  pre$Q50_1, pre.post.u$Q50_1) 
+pre.post_boxplot_t.test(pre.post$Q50_2,  pre$Q50_2, pre.post.u$Q50_2) 
+pre.post_boxplot_t.test(pre.post$Q50_4,  pre$Q50_4, pre.post.u$Q50_4) 
+pre.post_boxplot_t.test(pre.post$Q50_5,  pre$Q50_5, pre.post.u$Q50_5) 
+pre.post_boxplot_t.test(pre.post$Q50_6,  pre$Q50_6, pre.post.u$Q50_6) 
+pre.post_boxplot_t.test(pre.post$Q67_1,  pre$Q67_1, pre.post.u$Q67_1) 
+pre.post_boxplot_t.test(pre.post$Q67_2,  pre$Q67_2, pre.post.u$Q67_2) 
+pre.post_boxplot_t.test(pre.post$Q67_3,  pre$Q67_3, pre.post.u$Q67_3)
+pre.post_boxplot_t.test(pre.post$Q67_4,  pre$Q67_4, pre.post.u$Q67_4)
+pre.post_boxplot_t.test(pre.post$Q67_5,  pre$Q67_5, pre.post.u$Q67_5)
+pre.post_boxplot_t.test(pre.post$Q67_6,  pre$Q67_6, pre.post.u$Q67_6)
+pre.post_boxplot_t.test(pre.post$Q67_7,  pre$Q67_7, pre.post.u$Q67_7)
+pre.post_boxplot_t.test(pre.post$Q67_8,  pre$Q67_8, pre.post.u$Q67_8)
+pre.post_boxplot_t.test(pre.post$Q67_9,  pre$Q67_9, pre.post.u$Q67_9)
+pre.post_boxplot_t.test(pre.post$Q67_10,  pre$Q67_10, pre.post.u$Q67_10)
+
+```
+
+
+
+```{r}
+# look at just the post test only questions
+
+
+```
+

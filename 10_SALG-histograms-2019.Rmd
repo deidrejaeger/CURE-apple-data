@@ -1,0 +1,222 @@
+---
+title: "10_SALG-histograms"
+author: "Deidre Jaeger"
+date: "4/2/2020"
+output: pdf_document
+---
+
+```{r global_options, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, results= FALSE, echo= TRUE)
+
+# echo = false to turn off code
+
+```
+
+
+```{r load-libraries, echo = FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyr) #for pivot
+library(lubridate) # for dates
+library(agricolae) # for the tukey test
+```
+
+
+```{r load-data, echo = FALSE}
+
+# pre <- read.csv(file = "data/student-data/Pre-assessment EBIO 1250- section 012_March 5, 2020_10.19.csv",
+#                 header = T,
+#                 stringsAsFactors = F)
+# 
+# post <- read.csv(file = "data/student-data/post-assessment EBIO 1250- section 012_March 5, 2020_10.19.csv",
+#                  header = T,
+#                  stringsAsFactors = F)
+
+pre <- read.csv(file = "data/student-data/Pre-assessment2 EBIO 1250- section 012_March 5, 2020_17.33.csv",
+                header = T,
+                stringsAsFactors = F,
+                na.strings=c("","NA"))
+
+post <- read.csv(file = "data/student-data/post-assessment2 EBIO 1250- section 012_March 5, 2020_17.33.csv",
+                 header = T,
+                 stringsAsFactors = F,
+                 na.strings=c("","NA"))
+
+
+```
+
+```{r clean-fuse-datasets, echo = FALSE}
+# add a type column
+pre$type <- "pre2019"
+post$type <- "post2019"
+
+# remove the first 2 rows in each dataset that dont contain variables
+pre <- pre[-c(1:2),]
+post <- post[-c(1:2),]
+
+
+colnames(post) == colnames(pre)
+
+
+# poking around
+ncol(post)
+which(colnames(post)=="Q24" )
+which(colnames(post)=="Q25" )
+colnames(pre[61])
+
+# remove consent questions
+post2 <- post[, -c(which(colnames(post)=="Q24" ), which(colnames(post)=="Q25" ))]
+
+# remove weird parent topics questions
+pre2 <- pre[, -c(which(colnames(pre)== colnames(pre[61])),which(colnames(pre)==colnames(pre[62]) ))]
+
+# check that column names the same
+colnames(post2) == colnames(pre2)
+
+# Fuse the datasets
+pre.post <- rbind(pre2, post2)
+
+
+# clean up classes being coded as characters
+str(pre.post)
+
+# change columns of quantitative questions to numeric
+pre.post[, (which(colnames(pre.post)=="Q8.Q13_1" ):which(colnames(pre.post)=="Q34.40_7"))] <- sapply(pre.post[, (which(colnames(pre.post)=="Q8.Q13_1" ):which(colnames(pre.post)=="Q34.40_7"))], as.numeric)
+
+# Check structure
+str(pre.post)
+
+# change factor order
+pre.post$type <- factor(pre.post$type, levels = c("pre2019","post2019"))
+
+str(pre.post$type)
+
+```
+
+
+The SALG questions are not the same pre/post, so need to just look at histograms and compare before/after
+
+Non-content questions
+(SALG) Presently I Can…
+Scale Response Category 1 = I gained nothing/not at all 2 = I gained a little 3 = I gained somewhat 4 = I gained a lot 5 = I gained a great deal [different scale than Pre-Assessment]
+Q20. Find articles relevant to a particular problem in professional journals or elsewhere
+Q21. Critically read articles about issues raised in class
+Q22. Identify patterns in data
+Q23. Recognize a sound argument and appropriate use of evidence
+Q24. Develop a logical argument
+Q25. Write documents in discipline-appropriate style and format
+Q26. Work effectively with others
+Q27. Prepare and give oral presentations
+
+```{r SALG-presently-Ican, results= TRUE}
+
+# Q20. Find articles relevant to a particular problem in professional journals or elsewhere
+# improvement
+ggplot(data = pre.post, mapping = aes(x=Q20.27_1, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+# Q21. Critically read articles about issues raised in class
+# some improvement
+ggplot(data = pre.post, mapping = aes(x=Q20.27_2, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+# Q22. Identify patterns in data
+# improvement
+ggplot(data = pre.post, mapping = aes(x=Q20.27_3, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+# Q23. Recognize a sound argument and appropriate use of evidence
+# improvement
+ggplot(data = pre.post, mapping = aes(x=Q20.27_4, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+# Q24. Develop a logical argument
+# improvement
+ggplot(data = pre.post, mapping = aes(x=Q20.27_5, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+# Q25. Write documents in discipline-appropriate style and format
+# improvement
+ggplot(data = pre.post, mapping = aes(x=Q20.27_6, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+# Q26. Work effectively with others
+# minor improvement
+ggplot(data = pre.post, mapping = aes(x=Q20.27_7, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+# Q27. Prepare and give oral presentations
+# improvement
+ggplot(data = pre.post, mapping = aes(x=Q20.27_8, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+```
+
+
+(SALG) Presently I Understand…
+Scale Response Category 1 = I gained nothing/not at all 2 = I gained a little 3 = I gained somewhat 4 = I gained a lot 5 = I gained a great deal [different scale than Pre-Assessment]
+Q28. How ideas we will explore in this class relate to ideas I have encountered in other classes within this subject area
+Q29. How ideas we will explore in this class relate to ideas I have encountered in classes outside of this subject area
+Q30. How studying this subject helps people address real world issues
+
+
+```{r SALG-i-understand, results = TRUE}
+# Q28. How ideas we will explore in this class relate to ideas I have encountered in other classes within this subject area
+# no/minor improvment
+ggplot(data = pre.post, mapping = aes(x=Q28.30_1, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+# Q29. How ideas we will explore in this class relate to ideas I have encountered in classes outside of this subject area
+# less consensus
+ggplot(data = pre.post, mapping = aes(x=Q28.30_2, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+# Q30. How studying this subject helps people address real world issues
+# improvement
+ggplot(data = pre.post, mapping = aes(x=Q28.30_3, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+```
+
+
+(SALG) Presently I Am…
+Scale Response Category 1 = I gained nothing/not at all 2 = I gained a little 3 = I gained somewhat 4 = I gained a lot 5 = I gained a great deal [different scale than Pre-Assessment]
+Q31. Enthusiastic about this subject
+Q32.  Interested in discussing this subject area with friends or family
+Q33. Interested in taking or planning to take additional classes in this subject
+
+
+```{r SALG-I-am, results = TRUE}
+
+# Q31. Enthusiastic about this subject
+# overall gained
+ggplot(data = pre.post, mapping = aes(x=Q31.33_1, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+
+# Q32.  Interested in discussing this subject area with friends or family
+# imrproved
+ggplot(data = pre.post, mapping = aes(x=Q31.33_2, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+
+# Q33. Interested in taking or planning to take additional classes in this subject
+# overall gains
+ggplot(data = pre.post, mapping = aes(x=Q31.33_3, color = type)) +
+  geom_histogram() +
+  facet_wrap(~type)
+
+```
