@@ -2,7 +2,7 @@
 title: "11_lecture-survey-popcure2019"
 author: "Deidre Jaeger"
 date: "4/15/2020"
-output: html_document
+output: pdf_document
 ---
 
 ```{r global_options, include=FALSE, echo=FALSE}
@@ -175,29 +175,30 @@ return(t.test.plots)
 # pre.post.u.col <- pre.post.u$Q45_1
 ```
 
-```{r graph-all-questions}
 
+
+```{r the sig omnes}
 # significant diff for urban
 pre.post_boxplot_t.test(pre.post$Q45_3,  pre$Q45_3, pre.post.u$Q45_3)
 pre.post_boxplot_t.test(pre.post$Q41_2,  pre$Q41_2, pre.post.u$Q41_2)
 pre.post_boxplot_t.test(pre.post$Q41_5,  pre$Q41_5, pre.post.u$Q41_5) 
 
 
+```
+
+
+```{r mnot-sig-but-highermeans}
 # slight increase ,not significant
 pre.post_boxplot_t.test(pre.post$Q45_1,  pre$Q45_1, pre.post.u$Q45_1)
 pre.post_boxplot_t.test(pre.post$Q45_2,  pre$Q45_2, pre.post.u$Q45_2)
-
 pre.post_boxplot_t.test(pre.post$Q41_3,  pre$Q41_3, pre.post.u$Q41_3)  # noticable increase,not significant
 pre.post_boxplot_t.test(pre.post$Q41_4,  pre$Q41_4, pre.post.u$Q41_4)  # noticable increase,not significant
-
- pre.post_boxplot_t.test(pre.post$Q41_6,  pre$Q41_6, pre.post.u$Q41_6) # noticable increase,not significant
+pre.post_boxplot_t.test(pre.post$Q41_6,  pre$Q41_6, pre.post.u$Q41_6) # noticable increase,not significant
  pre.post_boxplot_t.test(pre.post$Q47,  pre$Q47, pre.post.u$Q47) # slight increase ,not significant
  pre.post_boxplot_t.test(pre.post$Q47_1,  pre$Q47_1, pre.post.u$Q47_1)
  pre.post_boxplot_t.test(pre.post$Q47_2,  pre$Q47_2, pre.post.u$Q47_2)
  pre.post_boxplot_t.test(pre.post$Q47_3,  pre$Q47_3, pre.post.u$Q47_3)
- 
  pre.post_boxplot_t.test(pre.post$Q41_1,  pre$Q41_1, pre.post.u$Q41_1)
- 
  pre.post_boxplot_t.test(pre.post$Q49_3,  pre$Q49_3, pre.post.u$Q49_3) 
  pre.post_boxplot_t.test(pre.post$Q49_5,  pre$Q49_5, pre.post.u$Q49_5)
  pre.post_boxplot_t.test(pre.post$Q50_3,  pre$Q50_3, pre.post.u$Q50_3) 
@@ -208,21 +209,21 @@ pre.post_boxplot_t.test(pre.post$Q41_4,  pre$Q41_4, pre.post.u$Q41_4)  # noticab
 pre.post_boxplot_t.test(pre.post$Q51_3,  pre$Q51_3, pre.post.u$Q51_3) 
 pre.post_boxplot_t.test(pre.post$Q51_4,  pre$Q51_4, pre.post.u$Q51_4)
 pre.post_boxplot_t.test(pre.post$Q51_5,  pre$Q51_5, pre.post.u$Q51_5) 
-
 pre.post_boxplot_t.test(pre.post$Q45_2.1,  pre$Q45_2.1, pre.post.u$Q45_2.1) # not showing up properly
 pre.post_boxplot_t.test(pre.post$Q45_3.1,  pre$Q45_3.1, pre.post.u$Q45_3.1)
 pre.post_boxplot_t.test(pre.post$Q49_1,  pre$Q49_1, pre.post.u$Q49_1) 
 pre.post_boxplot_t.test(pre.post$Q49_3,  pre$Q49_3, pre.post.u$Q49_3) 
+```
+
+
+```{r not sig, include = FALSE}
+
+
 
 # no sign diff for urban
-
-
 pre.post_boxplot_t.test(pre.post$Q45_4,  pre$Q45_4, pre.post.u$Q45_4)
 pre.post_boxplot_t.test(pre.post$Q45_5,  pre$Q45_5, pre.post.u$Q45_5)
 pre.post_boxplot_t.test(pre.post$Q45_6,  pre$Q45_6, pre.post.u$Q45_6)
-
-
-
 pre.post_boxplot_t.test(pre.post$Q47_4,  pre$Q47_4, pre.post.u$Q47_4) # urban section slightly down
 pre.post_boxplot_t.test(pre.post$Q47_5,  pre$Q47_5, pre.post.u$Q47_5)
 pre.post_boxplot_t.test(pre.post$Q47_6,  pre$Q47_6, pre.post.u$Q47_6)
@@ -232,7 +233,6 @@ pre.post_boxplot_t.test(pre.post$Q48_3,  pre$Q48_3, pre.post.u$Q48_3)
 pre.post_boxplot_t.test(pre.post$Q48_4,  pre$Q48_4, pre.post.u$Q48_4)
 pre.post_boxplot_t.test(pre.post$Q48_5,  pre$Q48_5, pre.post.u$Q48_5)
 pre.post_boxplot_t.test(pre.post$Q48_6,  pre$Q48_6, pre.post.u$Q48_6)
-
 pre.post_boxplot_t.test(pre.post$Q43_1,  pre$Q43_1, pre.post.u$Q43_1)
 pre.post_boxplot_t.test(pre.post$Q43_2,  pre$Q43_2, pre.post.u$Q43_2)
 pre.post_boxplot_t.test(pre.post$Q43_3,  pre$Q43_3, pre.post.u$Q43_3)
@@ -240,12 +240,8 @@ pre.post_boxplot_t.test(pre.post$Q43_4,  pre$Q43_4, pre.post.u$Q43_4)
 pre.post_boxplot_t.test(pre.post$Q43_5,  pre$Q43_5, pre.post.u$Q43_5)
 pre.post_boxplot_t.test(pre.post$Q43_5,  pre$Q43_5, pre.post.u$Q43_5)
 pre.post_boxplot_t.test(pre.post$Q45_1.1,  pre$Q45_1.1, pre.post.u$Q45_1.1)
-
-
-pre.post_boxplot_t.test(pre.post$Q45_4.1,  pre$Q45_4.1, pre.post.u$Q45_4.1) # not showing up properly
-
+pre.post_boxplot_t.test(pre.post$Q45_4.1,  pre$Q45_4.1, pre.post.u$Q45_4.1)
 pre.post_boxplot_t.test(pre.post$Q49_2,  pre$Q49_2, pre.post.u$Q49_2) 
-
 pre.post_boxplot_t.test(pre.post$Q49_4,  pre$Q49_4, pre.post.u$Q49_4) 
 pre.post_boxplot_t.test(pre.post$Q50_1,  pre$Q50_1, pre.post.u$Q50_1) 
 pre.post_boxplot_t.test(pre.post$Q50_2,  pre$Q50_2, pre.post.u$Q50_2) 
@@ -264,8 +260,6 @@ pre.post_boxplot_t.test(pre.post$Q67_9,  pre$Q67_9, pre.post.u$Q67_9)
 pre.post_boxplot_t.test(pre.post$Q67_10,  pre$Q67_10, pre.post.u$Q67_10)
 
 ```
-
-
 
 ```{r}
 # look at just the post test only questions
