@@ -1,9 +1,32 @@
 ---
 title: "11_lecture-survey-popcure2019"
 author: "Deidre Jaeger"
-date: "4/15/2020"
-output: pdf_document
+date: "5/6/2020"
+output: html_document
 ---
+This report looks at the difference in pre/post test responses for the POP-CURE survey instrument administered in EBIO 1250 lecture, Fall 2019. The Urban ecology section is compared to the combined genetics/ecopys sections
+
+# Contents:
+## Pre-Post test questions
+#### 1. Boulder Community Outcomes
+#### 2. CU Boulder Community Outcomes
+#### 3. EBIO Community
+#### 4. Science skills
+#### 5. Science Efficacy
+#### 6. Science Identity
+#### 7. Pursue science career
+#### 8. Biology skills used in community
+#### 9. Biology skill used outside of classes
+#### 10. Biology importance in community
+#### 11. Biology skills to help community
+## Post-test only questions
+#### 12. Encouragement with course-related activities
+#### 13. Science activities
+#### 14. Science tasks
+#### 15. Intro Bio 
+#### 16. CURE activities 
+#### 17. Lab and Lecture experience
+
 
 ```{r global_options, include=FALSE, echo=FALSE}
 knitr::opts_chunk$set(warning=FALSE, message=FALSE, results= TRUE, echo= FALSE)
@@ -22,12 +45,12 @@ library(agricolae) # for the tukey test
 ```
 
 ```{r load-data, echo = FALSE}
-pre <- read.csv(file = "data/student-data/lecture-2019/PopCURE_PreSurvey_Fa2019-urban-coded.csv",
+pre <- read.csv(file = "/Users/deidrejaeger/Documents/Career/CU-Boulder/Research/CURE-apple-data/CURE-apple-data/data/student-data/lecture-2019/PopCURE_PreSurvey_Fa2019-urban-coded.csv",
                 header = T,
                 stringsAsFactors = F,
                 na.strings=c("","NA"))
 
-post <- read.csv(file = "data/student-data/lecture-2019/PopCURE_PostSurvey_Fa2019-urban-coded.csv",
+post <- read.csv(file = "/Users/deidrejaeger/Documents/Career/CU-Boulder/Research/CURE-apple-data/CURE-apple-data/data/student-data/lecture-2019/PopCURE_PostSurvey_Fa2019-urban-coded.csv",
                  header = T,
                  stringsAsFactors = F,
                  na.strings=c("","NA"))
@@ -108,11 +131,19 @@ pre.post.u <- pre.post %>%
 ```
 
 
+
 ```{r compare-pre-post, include = FALSE}
 
 # look at question responses for group pre/post, then facet by section-code
 print(pre$Q41_1[1])
 t.test(pre.post$Q45_1 ~ pre.post$type)
+
+# # get column number
+# which( colnames(pre) == "Q41_1")
+# col_num <- sub(" $.*", "", pre$)
+# print( as.character(pre$Q41_2))
+# 
+
 # boxplot(pre.post$Q45_1 ~ pre.post$type, title = print(pre$Q41_1))
 
 ggplot(data = pre.post, aes(x = type, y = Q45_1, fill = type)) +
@@ -132,16 +163,24 @@ ggplot(data = pre.post, aes(x = type, y = Q45_1, fill = type)) +
 
 ```
 
+```{r create-numbers-for-columns}
+# left off pre lunch: how to get the title of the question onto the y axis
+pre.post.names <- pre.post %>% 
+  rbind(c(colnames(pre.post))) %>% 
+  slice(61)
+```
+
+
 
 ```{r function-plot-t-test}
 
-pre.post_boxplot_t.test <- function(pre.post.column, pre.column, pre.post.u.col) {
+pre.post_boxplot_t.test <- function(pre.post.column, pre.column, pre.post.u.col, col.name) {
   
   #### function to create graphs and run t- tests for the lecture POPCURE survey for 2019
   ### inputs are 3 column names for the question
   ## pre.post.column = pre.post$Q45_1
   # pre.column <- pre$Q45_1
-  # pre.post.u.col <- pre.post.u$Q45_1
+  # pre.post.u.col <- pre.post.u$Q45_1 # urban section only
   
   # outputs are a test with the full set of data, a graph of the full pre/post, a t test of the urban section only, and a graph of the urban section compared to rest of the class
   
@@ -150,7 +189,8 @@ t <- t.test(pre.post.column ~ pre.post$type)
 p.1 <- ggplot(data = pre.post, aes(x = type, y = pre.post.column, fill = type)) +
   geom_boxplot() +
   scale_fill_manual(values = c("salmon", "turquoise")) +
-  ggtitle(print(pre.column[1])) +
+  ggtitle(print( pre.column[1])) +
+  ylab(col.name) +
   theme_classic()
 
 t.u <- t.test(pre.post.u.col ~ pre.post.u$type)
@@ -159,60 +199,340 @@ p.2 <- ggplot(data = pre.post, aes(x = type, y = pre.post.column, fill = type)) 
   geom_boxplot() +
   scale_fill_manual(values = c("salmon", "turquoise")) +
   ggtitle(pre.column[1]) +
+  ylab(col.name) +
   theme_classic() +
   facet_wrap( ~ section)
 
-t.test.plots <- list(t, p.1, t.u, p.2)
+t.test.plots <- list(col.name, t, p.1, t.u, p.2)
 return(t.test.plots)
 
 }
 
 # pre.post_boxplot_t.test(pre.post$Q45_1,  pre$Q45_1, pre.post.u$Q45_1)
-# test function
+# # test function
 # pre.post.column = pre.post$Q45_1
 # question_number <- "Q45_1"
 # pre.column <- pre$Q45_1
 # pre.post.u.col <- pre.post.u$Q45_1
+# 
+# 
+# which( colnames(pre.post.column) == colnames(pre.post.names))
 ```
 
 
 
-```{r the sig omnes}
+## 1. Boulder Community Outcomes
+### The following asks you the extent to which you agree or disagree with statements about the surrounding Boulder Community, the community associated with the city of Boulder Colorado. 
+```{r Boulder Community Outcomes}
+pre.post_boxplot_t.test(pre.post$Q45_1,  pre$Q45_1, pre.post.u$Q45_1, "Q45_1")
+pre.post_boxplot_t.test(pre.post$Q45_2,  pre$Q45_2, pre.post.u$Q45_2, "Q45_2")
+pre.post_boxplot_t.test(pre.post$Q45_3,  pre$Q45_3, pre.post.u$Q45_3, "Q45_3")
+pre.post_boxplot_t.test(pre.post$Q45_4,  pre$Q45_4, pre.post.u$Q45_4, "Q45_4")
+pre.post_boxplot_t.test(pre.post$Q45_5,  pre$Q45_5, pre.post.u$Q45_5, "Q45_5")
+pre.post_boxplot_t.test(pre.post$Q45_6,  pre$Q45_6, pre.post.u$Q45_6, "Q45_6")
+```
+
+## 2. CU Boulder Community
+
+### The following asks you the extent to which you agree or disagree with statements about the CU Boulder Community, the community associated with the University of Colorado. 
+```{r}
+pre.post_boxplot_t.test(pre.post$Q47_1,  pre$Q47_1, pre.post.u$Q47_1, "Q47_1")
+pre.post_boxplot_t.test(pre.post$Q47_2,  pre$Q47_2, pre.post.u$Q47_2, "Q47_2")
+pre.post_boxplot_t.test(pre.post$Q47_3,  pre$Q47_3, pre.post.u$Q47_3, "Q47_3")
+pre.post_boxplot_t.test(pre.post$Q47_4,  pre$Q47_4, pre.post.u$Q47_4, "Q47_4")
+pre.post_boxplot_t.test(pre.post$Q47_5,  pre$Q47_5, pre.post.u$Q47_5, "Q47_5")
+pre.post_boxplot_t.test(pre.post$Q47_6,  pre$Q47_6, pre.post.u$Q47_6, "Q47_6")
+```
+
+## 3. EBIO Community
+
+### The following asks you the extent to which you agree or disagree with statements about the EBIO Community, the community associated with the Ecology and Evolutionary Biology Department at CU Boulder. 
+```{r - ebio community}
+pre.post_boxplot_t.test(pre.post$Q48_1,  pre$Q48_1, pre.post.u$Q48_1, "Q48_1")
+pre.post_boxplot_t.test(pre.post$Q48_2,  pre$Q48_2, pre.post.u$Q48_2, "Q48_2")
+pre.post_boxplot_t.test(pre.post$Q48_3,  pre$Q48_3, pre.post.u$Q48_3, "Q48_3")
+pre.post_boxplot_t.test(pre.post$Q48_4,  pre$Q48_4, pre.post.u$Q48_4, "Q48_4")
+pre.post_boxplot_t.test(pre.post$Q48_5,  pre$Q48_5, pre.post.u$Q48_5, "Q48_5")
+pre.post_boxplot_t.test(pre.post$Q48_6,  pre$Q48_6, pre.post.u$Q48_6, "Q48_6")
+```
+
+
+## 4. Science skills
+
+### Please indicate how confident you are in your ability to...
+```{r science skills}
+pre.post_boxplot_t.test(pre.post$Q41_1,  pre$Q41_1, pre.post.u$Q41_1, "Q41_1")
+pre.post_boxplot_t.test(pre.post$Q41_2,  pre$Q41_2, pre.post.u$Q41_2, "Q41_2")
+pre.post_boxplot_t.test(pre.post$Q41_3,  pre$Q41_3, pre.post.u$Q41_3, "Q41_3")
+pre.post_boxplot_t.test(pre.post$Q41_4,  pre$Q41_4, pre.post.u$Q41_4, "Q41_4")
+pre.post_boxplot_t.test(pre.post$Q41_5,  pre$Q41_5, pre.post.u$Q41_5, "Q41_5")
+pre.post_boxplot_t.test(pre.post$Q41_6,  pre$Q41_6, pre.post.u$Q41_6, "Q41_6")
+
+
+```
+
+## 5. Science efficacy
+### Please indicate the extent to which you agree with the following statements. 
+
+
+```{r science efficacy}
+pre.post_boxplot_t.test(pre.post$Q43_1,  pre$Q43_1, pre.post.u$Q43_1, "Q43_1")
+pre.post_boxplot_t.test(pre.post$Q43_2,  pre$Q43_2, pre.post.u$Q43_2, "Q43_2")
+pre.post_boxplot_t.test(pre.post$Q43_3,  pre$Q43_3, pre.post.u$Q43_3, "Q43_3")
+pre.post_boxplot_t.test(pre.post$Q43_4,  pre$Q43_4, pre.post.u$Q43_4, "Q43_4")
+pre.post_boxplot_t.test(pre.post$Q43_5,  pre$Q43_5, pre.post.u$Q43_5, "Q43_5")
+
+
+```
+
+
+## 6. Science identity
+### How much is the person in the following descriptions like you?
+
+```{r}
+pre.post_boxplot_t.test(pre.post$Q45_1,  pre$Q45_1, pre.post.u$Q45_1, "Q45_1")
+pre.post_boxplot_t.test(pre.post$Q45_2,  pre$Q45_2, pre.post.u$Q45_2, "Q45_2")
+pre.post_boxplot_t.test(pre.post$Q45_3,  pre$Q45_3, pre.post.u$Q45_3, "Q45_3")
+pre.post_boxplot_t.test(pre.post$Q45_4,  pre$Q45_4, pre.post.u$Q45_4, "Q45_4")
+
+
+```
+
+## 7. Pursue science career
+
+```{r}
+pre.post_boxplot_t.test(pre.post$Q47,  pre$Q47, pre.post.u$Q47, "Q47")
+```
+
+## 8. Biology skills used in community
+### To what extent do you agree or disagree with the following statements regarding using your biology skills to help your local community?
+
+```{r}
+
+pre.post_boxplot_t.test(pre.post$Q49_1,  pre$Q49_1, pre.post.u$Q49_1, "Q49_1")
+pre.post_boxplot_t.test(pre.post$Q49_2,  pre$Q49_2, pre.post.u$Q49_2, "Q49_2")
+pre.post_boxplot_t.test(pre.post$Q49_3,  pre$Q49_3, pre.post.u$Q49_3, "Q49_3")
+pre.post_boxplot_t.test(pre.post$Q49_4,  pre$Q49_4, pre.post.u$Q49_4, "Q49_4")
+pre.post_boxplot_t.test(pre.post$Q49_5,  pre$Q49_5, pre.post.u$Q49_5, "Q49_5")
+
+```
+
+## 9 Biology skill used outside of classes
+### These questions pertain to your activities outside of formal classes. To what extent do you agree or disagree with the following statements regarding your biology skills and local community interaction?
+
+```{r}
+pre.post_boxplot_t.test(pre.post$Q50_1,  pre$Q50_1, pre.post.u$Q50_1, "Q50_1")
+pre.post_boxplot_t.test(pre.post$Q50_2,  pre$Q50_2, pre.post.u$Q50_2, "Q50_2")
+pre.post_boxplot_t.test(pre.post$Q50_3,  pre$Q50_3, pre.post.u$Q50_3, "Q50_3")
+pre.post_boxplot_t.test(pre.post$Q50_4,  pre$Q50_4, pre.post.u$Q50_4, "Q50_4")
+pre.post_boxplot_t.test(pre.post$Q50_5,  pre$Q50_5, pre.post.u$Q50_5, "Q50_5")
+pre.post_boxplot_t.test(pre.post$Q50_6,  pre$Q50_6, pre.post.u$Q50_6, "Q50_6")
+pre.post_boxplot_t.test(pre.post$Q50_7,  pre$Q50_7, pre.post.u$Q50_7, "Q50_7")
+pre.post_boxplot_t.test(pre.post$Q50_8,  pre$Q50_8, pre.post.u$Q50_8, "Q50_8")
+```
+
+
+## 10. Biology importance in community
+### To what extent do you agree or disagree with the following statements regarding using your biology skills to help your local community?
+
+
+
+```{r}
+
+pre.post_boxplot_t.test(pre.post$Q51_1,  pre$Q51_1, pre.post.u$Q51_1, "Q51_1")
+pre.post_boxplot_t.test(pre.post$Q51_2,  pre$Q51_2, pre.post.u$Q51_2, "Q51_2")
+pre.post_boxplot_t.test(pre.post$Q51_3,  pre$Q51_3, pre.post.u$Q51_3, "Q51_3")
+pre.post_boxplot_t.test(pre.post$Q51_4,  pre$Q51_4, pre.post.u$Q51_4, "Q51_4")
+pre.post_boxplot_t.test(pre.post$Q51_5,  pre$Q51_5, pre.post.u$Q51_5, "Q51_5")
+
+```
+
+## 11. Biology skills to help community
+### To what extent do you agree or disagree with the following statements regarding using your biology skills to help your local community?
+
+```{r}
+pre.post_boxplot_t.test(pre.post$Q67_1,  pre$Q67_1, pre.post.u$Q67_1, "Q67_1")
+pre.post_boxplot_t.test(pre.post$Q67_2,  pre$Q67_2, pre.post.u$Q67_2, "Q67_2")
+pre.post_boxplot_t.test(pre.post$Q67_3,  pre$Q67_3, pre.post.u$Q67_3, "Q67_3")
+pre.post_boxplot_t.test(pre.post$Q67_4,  pre$Q67_4, pre.post.u$Q67_4, "Q67_4")
+pre.post_boxplot_t.test(pre.post$Q67_5,  pre$Q67_5, pre.post.u$Q67_5, "Q67_5")
+pre.post_boxplot_t.test(pre.post$Q67_6,  pre$Q67_6, pre.post.u$Q67_6, "Q67_6")
+pre.post_boxplot_t.test(pre.post$Q67_7,  pre$Q67_7, pre.post.u$Q67_7, "Q67_7")
+pre.post_boxplot_t.test(pre.post$Q67_8,  pre$Q67_8, pre.post.u$Q67_8, "Q67_8")
+pre.post_boxplot_t.test(pre.post$Q67_9,  pre$Q67_9, pre.post.u$Q67_9, "Q67_9")
+pre.post_boxplot_t.test(pre.post$Q67_10,  pre$Q67_10, pre.post.u$Q67_10, "Q67_10")
+```
+# Post-test only questions
+
+```{r}
+post_boxplot_t.test <- function(post.1.column, post.q, col.name) {
+  
+  #### function to create graphs and run t- tests for the lecture POPCURE survey for 2019
+  ### inputs are 3 column names for the question
+  
+  # need to already have loaded the post.1 dataset that the ttest annd graphs draw from
+  ## pre.post.column = pre.post$Q45_1
+  # pre.column <- pre$Q45_1
+  # pre.post.u.col <- pre.post.u$Q45_1 # urban section only
+  
+  # outputs are a test with the full set of data, a graph of the full pre/post, a t test of the urban section only, and a graph of the urban section compared to rest of the class
+  
+
+# t.u <- t.test(post.column ~ post.1$section)
+
+p.2 <- ggplot(data = post.1, aes(x = post.1.column, fill = section)) +
+  geom_histogram(stat = "count", position = "identity", alpha = 0.6) +
+  scale_fill_manual(values = c( "turquoise", "salmon")) +
+  ggtitle(print(post.q[1])) +
+  ylab(col.name) +
+  theme_classic() 
+
+# t.test.plots <- list(t.u, p.2)
+return(p.2)
+}
+
+
+```
+
+
+## 12. Encouragement with course-related activities
+### The following statements are about your introductory biology laboratory course. They ask about how often the instructor encouraged the students to do different course-related activities.
+In this course, I was encouraged to… 
+
+1 = weekly
+
+
+```{r}
+post_boxplot_t.test(post.1$Q35_1, post$Q35_1,"Q35_1")
+post_boxplot_t.test(post.1$Q35_2, post$Q35_2,"Q35_2")
+post_boxplot_t.test(post.1$Q35_3, post$Q35_3,"Q35_3")
+post_boxplot_t.test(post.1$Q35_4, post$Q35_4,"Q35_4")
+post_boxplot_t.test(post.1$Q35_5, post$Q35_5,"Q35_5")
+post_boxplot_t.test(post.1$Q35_6, post$Q35_6,"Q35_6")
+
+```
+
+# 13. Science activities
+### The following statements are about the types of science activities students were expected to perform during your introductory biology laboratory course.
+
+6 = strongly agree
+
+```{r}
+
+post_boxplot_t.test(post.1$Q37_1, post$Q37_1,"Q37_1")
+post_boxplot_t.test(post.1$Q37_2, post$Q37_2,"Q37_2")
+post_boxplot_t.test(post.1$Q37_3, post$Q37_3,"Q37_3")
+post_boxplot_t.test(post.1$Q37_4, post$Q37_4,"Q37_4")
+post_boxplot_t.test(post.1$Q37_5, post$Q37_5,"Q37_5")
+```
+
+# 14. Science tasks
+
+### The following statements are about what students were expected to perform or had time to accomplish during your introductory biology laboratory course.
+In this course, ... 
+
+6 = strongly agree
+
+```{r}
+
+post_boxplot_t.test(post.1$Q39_1, post$Q39_1,"Q39_1")
+post_boxplot_t.test(post.1$Q39_2, post$Q39_2,"Q39_2")
+post_boxplot_t.test(post.1$Q39_3, post$Q39_3,"Q39_3")
+post_boxplot_t.test(post.1$Q39_4, post$Q39_4,"Q39_4")
+post_boxplot_t.test(post.1$Q39_5, post$Q39_5,"Q39_5")
+post_boxplot_t.test(post.1$Q39_6, post$Q39_6,"Q39_6")
+
+```
+
+# 15. Intro Bio 
+
+### The following statements ask about your introductory biology laboratory course. With this course in mind, please indicate the extent to which you agree or disagree with the following statements: - 
+
+```{r}
+post_boxplot_t.test(post.1$Q49_1, post$Q49_1,"Q49_1")
+post_boxplot_t.test(post.1$Q49_2, post$Q49_2,"Q49_2")
+post_boxplot_t.test(post.1$Q49_3, post$Q49_3,"Q49_3")
+post_boxplot_t.test(post.1$Q49_4, post$Q49_4,"Q49_4")
+post_boxplot_t.test(post.1$Q49_5, post$Q49_5,"Q49_5")
+post_boxplot_t.test(post.1$Q49_6, post$Q49_6,"Q49_6")
+post_boxplot_t.test(post.1$Q49_7, post$Q49_7,"Q49_7")
+post_boxplot_t.test(post.1$Q49_8, post$Q49_8,"Q49_8")
+post_boxplot_t.test(post.1$Q49_9, post$Q49_9,"Q49_9")
+post_boxplot_t.test(post.1$Q49_10, post$Q49_10,"Q49_10")
+```
+
+# 16. CURE experience
+
+Please respond to the following: - To what extent does the word ______ describe your experience of the laboratory course?
+
+```{r}
+post_boxplot_t.test(post.1$Q33_1, post$Q33_1,"Q33_1")
+post_boxplot_t.test(post.1$Q33_2, post$Q33_2,"Q33_2")
+post_boxplot_t.test(post.1$Q33_3, post$Q33_3,"Q33_3")
+post_boxplot_t.test(post.1$Q33_4, post$Q33_4,"Q33_4")
+post_boxplot_t.test(post.1$Q33_5, post$Q33_5,"Q33_5")
+post_boxplot_t.test(post.1$Q33_6, post$Q33_6,"Q33_6")
+
+```
+
+# 17. Lab and Lecture experience
+### The following statements as about your introductory EBIO course laboratory AND lecture section.  Please rate your agreement with the following statements. 
+```{r}
+post_boxplot_t.test(post.1$Q44_1, post$Q44_1,"Q44_1")
+post_boxplot_t.test(post.1$Q44_2, post$Q44_2,"Q44_2")
+post_boxplot_t.test(post.1$Q44_3, post$Q44_3,"Q44_3")
+post_boxplot_t.test(post.1$Q44_4, post$Q44_4,"Q44_4")
+post_boxplot_t.test(post.1$Q44_5, post$Q44_5,"Q44_5")
+```
+
+
+```{r the sig omnes, include = FALSE}
 # significant diff for urban
-pre.post_boxplot_t.test(pre.post$Q45_3,  pre$Q45_3, pre.post.u$Q45_3)
-pre.post_boxplot_t.test(pre.post$Q41_2,  pre$Q41_2, pre.post.u$Q41_2)
-pre.post_boxplot_t.test(pre.post$Q41_5,  pre$Q41_5, pre.post.u$Q41_5) 
+pre.post_boxplot_t.test(pre.post$Q45_3,  pre$Q45_3, pre.post.u$Q45_3, "Q45_3")
+pre.post_boxplot_t.test(pre.post$Q41_2,  pre$Q41_2, pre.post.u$Q41_2, "Q41_2")
+pre.post_boxplot_t.test(pre.post$Q41_5,  pre$Q41_5, pre.post.u$Q41_5, "Q41_5")
+
+
+# Q47 increase in intent to pursue a science related career 
+
+# sig for class
+# Q41_3
+# Q41_1
+# Q41_6
+# Q45_3
+
+
 
 
 ```
 
 
-```{r mnot-sig-but-highermeans}
+```{r mnot-sig-but-highermeans, include = FALSE}
 # slight increase ,not significant
-pre.post_boxplot_t.test(pre.post$Q45_1,  pre$Q45_1, pre.post.u$Q45_1)
-pre.post_boxplot_t.test(pre.post$Q45_2,  pre$Q45_2, pre.post.u$Q45_2)
-pre.post_boxplot_t.test(pre.post$Q41_3,  pre$Q41_3, pre.post.u$Q41_3)  # noticable increase,not significant
-pre.post_boxplot_t.test(pre.post$Q41_4,  pre$Q41_4, pre.post.u$Q41_4)  # noticable increase,not significant
-pre.post_boxplot_t.test(pre.post$Q41_6,  pre$Q41_6, pre.post.u$Q41_6) # noticable increase,not significant
- pre.post_boxplot_t.test(pre.post$Q47,  pre$Q47, pre.post.u$Q47) # slight increase ,not significant
- pre.post_boxplot_t.test(pre.post$Q47_1,  pre$Q47_1, pre.post.u$Q47_1)
- pre.post_boxplot_t.test(pre.post$Q47_2,  pre$Q47_2, pre.post.u$Q47_2)
- pre.post_boxplot_t.test(pre.post$Q47_3,  pre$Q47_3, pre.post.u$Q47_3)
- pre.post_boxplot_t.test(pre.post$Q41_1,  pre$Q41_1, pre.post.u$Q41_1)
- pre.post_boxplot_t.test(pre.post$Q49_3,  pre$Q49_3, pre.post.u$Q49_3) 
- pre.post_boxplot_t.test(pre.post$Q49_5,  pre$Q49_5, pre.post.u$Q49_5)
- pre.post_boxplot_t.test(pre.post$Q50_3,  pre$Q50_3, pre.post.u$Q50_3) 
- pre.post_boxplot_t.test(pre.post$Q50_7,  pre$Q50_7, pre.post.u$Q50_7) 
- pre.post_boxplot_t.test(pre.post$Q50_8,  pre$Q50_8, pre.post.u$Q50_8) 
- pre.post_boxplot_t.test(pre.post$Q51_1,  pre$Q51_1, pre.post.u$Q51_1) 
- pre.post_boxplot_t.test(pre.post$Q51_2,  pre$Q51_2, pre.post.u$Q51_2) 
-pre.post_boxplot_t.test(pre.post$Q51_3,  pre$Q51_3, pre.post.u$Q51_3) 
-pre.post_boxplot_t.test(pre.post$Q51_4,  pre$Q51_4, pre.post.u$Q51_4)
-pre.post_boxplot_t.test(pre.post$Q51_5,  pre$Q51_5, pre.post.u$Q51_5) 
-pre.post_boxplot_t.test(pre.post$Q45_2.1,  pre$Q45_2.1, pre.post.u$Q45_2.1) # not showing up properly
-pre.post_boxplot_t.test(pre.post$Q45_3.1,  pre$Q45_3.1, pre.post.u$Q45_3.1)
-pre.post_boxplot_t.test(pre.post$Q49_1,  pre$Q49_1, pre.post.u$Q49_1) 
-pre.post_boxplot_t.test(pre.post$Q49_3,  pre$Q49_3, pre.post.u$Q49_3) 
+# pre.post_boxplot_t.test(pre.post$Q45_1,  pre$Q45_1, pre.post.u$Q45_1)
+# pre.post_boxplot_t.test(pre.post$Q45_2,  pre$Q45_2, pre.post.u$Q45_2)
+# pre.post_boxplot_t.test(pre.post$Q41_3,  pre$Q41_3, pre.post.u$Q41_3)  # noticable increase,not significant
+# pre.post_boxplot_t.test(pre.post$Q41_4,  pre$Q41_4, pre.post.u$Q41_4)  # noticable increase,not significant
+# pre.post_boxplot_t.test(pre.post$Q41_6,  pre$Q41_6, pre.post.u$Q41_6) # noticable increase,not significant
+#  pre.post_boxplot_t.test(pre.post$Q47,  pre$Q47, pre.post.u$Q47) # slight increase ,not significant
+#  pre.post_boxplot_t.test(pre.post$Q47_1,  pre$Q47_1, pre.post.u$Q47_1)
+#  pre.post_boxplot_t.test(pre.post$Q47_2,  pre$Q47_2, pre.post.u$Q47_2)
+#  pre.post_boxplot_t.test(pre.post$Q47_3,  pre$Q47_3, pre.post.u$Q47_3)
+#  pre.post_boxplot_t.test(pre.post$Q41_1,  pre$Q41_1, pre.post.u$Q41_1)
+#  pre.post_boxplot_t.test(pre.post$Q49_3,  pre$Q49_3, pre.post.u$Q49_3) 
+#  pre.post_boxplot_t.test(pre.post$Q49_5,  pre$Q49_5, pre.post.u$Q49_5)
+#  pre.post_boxplot_t.test(pre.post$Q50_3,  pre$Q50_3, pre.post.u$Q50_3) 
+#  pre.post_boxplot_t.test(pre.post$Q50_7,  pre$Q50_7, pre.post.u$Q50_7) 
+#  pre.post_boxplot_t.test(pre.post$Q50_8,  pre$Q50_8, pre.post.u$Q50_8) 
+#  pre.post_boxplot_t.test(pre.post$Q51_1,  pre$Q51_1, pre.post.u$Q51_1) 
+#  pre.post_boxplot_t.test(pre.post$Q51_2,  pre$Q51_2, pre.post.u$Q51_2) 
+# pre.post_boxplot_t.test(pre.post$Q51_3,  pre$Q51_3, pre.post.u$Q51_3) 
+# pre.post_boxplot_t.test(pre.post$Q51_4,  pre$Q51_4, pre.post.u$Q51_4)
+# pre.post_boxplot_t.test(pre.post$Q51_5,  pre$Q51_5, pre.post.u$Q51_5) 
+# pre.post_boxplot_t.test(pre.post$Q45_2.1,  pre$Q45_2.1, pre.post.u$Q45_2.1) # not showing up properly
+# pre.post_boxplot_t.test(pre.post$Q45_3.1,  pre$Q45_3.1, pre.post.u$Q45_3.1)
+# pre.post_boxplot_t.test(pre.post$Q49_1,  pre$Q49_1, pre.post.u$Q49_1) 
+# pre.post_boxplot_t.test(pre.post$Q49_3,  pre$Q49_3, pre.post.u$Q49_3) 
 ```
 
 
@@ -220,50 +540,45 @@ pre.post_boxplot_t.test(pre.post$Q49_3,  pre$Q49_3, pre.post.u$Q49_3)
 
 
 
-# no sign diff for urban
-pre.post_boxplot_t.test(pre.post$Q45_4,  pre$Q45_4, pre.post.u$Q45_4)
-pre.post_boxplot_t.test(pre.post$Q45_5,  pre$Q45_5, pre.post.u$Q45_5)
-pre.post_boxplot_t.test(pre.post$Q45_6,  pre$Q45_6, pre.post.u$Q45_6)
-pre.post_boxplot_t.test(pre.post$Q47_4,  pre$Q47_4, pre.post.u$Q47_4) # urban section slightly down
-pre.post_boxplot_t.test(pre.post$Q47_5,  pre$Q47_5, pre.post.u$Q47_5)
-pre.post_boxplot_t.test(pre.post$Q47_6,  pre$Q47_6, pre.post.u$Q47_6)
-pre.post_boxplot_t.test(pre.post$Q48_1,  pre$Q48_1, pre.post.u$Q48_1)
-pre.post_boxplot_t.test(pre.post$Q48_2,  pre$Q48_2, pre.post.u$Q48_2) #urban section slightly down
-pre.post_boxplot_t.test(pre.post$Q48_3,  pre$Q48_3, pre.post.u$Q48_3)
-pre.post_boxplot_t.test(pre.post$Q48_4,  pre$Q48_4, pre.post.u$Q48_4)
-pre.post_boxplot_t.test(pre.post$Q48_5,  pre$Q48_5, pre.post.u$Q48_5)
-pre.post_boxplot_t.test(pre.post$Q48_6,  pre$Q48_6, pre.post.u$Q48_6)
-pre.post_boxplot_t.test(pre.post$Q43_1,  pre$Q43_1, pre.post.u$Q43_1)
-pre.post_boxplot_t.test(pre.post$Q43_2,  pre$Q43_2, pre.post.u$Q43_2)
-pre.post_boxplot_t.test(pre.post$Q43_3,  pre$Q43_3, pre.post.u$Q43_3)
-pre.post_boxplot_t.test(pre.post$Q43_4,  pre$Q43_4, pre.post.u$Q43_4)
-pre.post_boxplot_t.test(pre.post$Q43_5,  pre$Q43_5, pre.post.u$Q43_5)
-pre.post_boxplot_t.test(pre.post$Q43_5,  pre$Q43_5, pre.post.u$Q43_5)
-pre.post_boxplot_t.test(pre.post$Q45_1.1,  pre$Q45_1.1, pre.post.u$Q45_1.1)
-pre.post_boxplot_t.test(pre.post$Q45_4.1,  pre$Q45_4.1, pre.post.u$Q45_4.1)
-pre.post_boxplot_t.test(pre.post$Q49_2,  pre$Q49_2, pre.post.u$Q49_2) 
-pre.post_boxplot_t.test(pre.post$Q49_4,  pre$Q49_4, pre.post.u$Q49_4) 
-pre.post_boxplot_t.test(pre.post$Q50_1,  pre$Q50_1, pre.post.u$Q50_1) 
-pre.post_boxplot_t.test(pre.post$Q50_2,  pre$Q50_2, pre.post.u$Q50_2) 
-pre.post_boxplot_t.test(pre.post$Q50_4,  pre$Q50_4, pre.post.u$Q50_4) 
-pre.post_boxplot_t.test(pre.post$Q50_5,  pre$Q50_5, pre.post.u$Q50_5) 
-pre.post_boxplot_t.test(pre.post$Q50_6,  pre$Q50_6, pre.post.u$Q50_6) 
-pre.post_boxplot_t.test(pre.post$Q67_1,  pre$Q67_1, pre.post.u$Q67_1) 
-pre.post_boxplot_t.test(pre.post$Q67_2,  pre$Q67_2, pre.post.u$Q67_2) 
-pre.post_boxplot_t.test(pre.post$Q67_3,  pre$Q67_3, pre.post.u$Q67_3)
-pre.post_boxplot_t.test(pre.post$Q67_4,  pre$Q67_4, pre.post.u$Q67_4)
-pre.post_boxplot_t.test(pre.post$Q67_5,  pre$Q67_5, pre.post.u$Q67_5)
-pre.post_boxplot_t.test(pre.post$Q67_6,  pre$Q67_6, pre.post.u$Q67_6)
-pre.post_boxplot_t.test(pre.post$Q67_7,  pre$Q67_7, pre.post.u$Q67_7)
-pre.post_boxplot_t.test(pre.post$Q67_8,  pre$Q67_8, pre.post.u$Q67_8)
-pre.post_boxplot_t.test(pre.post$Q67_9,  pre$Q67_9, pre.post.u$Q67_9)
-pre.post_boxplot_t.test(pre.post$Q67_10,  pre$Q67_10, pre.post.u$Q67_10)
+# # no sign diff for urban
+# pre.post_boxplot_t.test(pre.post$Q45_4,  pre$Q45_4, pre.post.u$Q45_4)
+# pre.post_boxplot_t.test(pre.post$Q45_5,  pre$Q45_5, pre.post.u$Q45_5)
+# pre.post_boxplot_t.test(pre.post$Q45_6,  pre$Q45_6, pre.post.u$Q45_6)
+# pre.post_boxplot_t.test(pre.post$Q47_4,  pre$Q47_4, pre.post.u$Q47_4) # urban section slightly down
+# pre.post_boxplot_t.test(pre.post$Q47_5,  pre$Q47_5, pre.post.u$Q47_5)
+# pre.post_boxplot_t.test(pre.post$Q47_6,  pre$Q47_6, pre.post.u$Q47_6)
+# pre.post_boxplot_t.test(pre.post$Q48_1,  pre$Q48_1, pre.post.u$Q48_1)
+# pre.post_boxplot_t.test(pre.post$Q48_2,  pre$Q48_2, pre.post.u$Q48_2) #urban section slightly down
+# pre.post_boxplot_t.test(pre.post$Q48_3,  pre$Q48_3, pre.post.u$Q48_3)
+# pre.post_boxplot_t.test(pre.post$Q48_4,  pre$Q48_4, pre.post.u$Q48_4)
+# pre.post_boxplot_t.test(pre.post$Q48_5,  pre$Q48_5, pre.post.u$Q48_5)
+# pre.post_boxplot_t.test(pre.post$Q48_6,  pre$Q48_6, pre.post.u$Q48_6)
+# pre.post_boxplot_t.test(pre.post$Q43_1,  pre$Q43_1, pre.post.u$Q43_1)
+# pre.post_boxplot_t.test(pre.post$Q43_2,  pre$Q43_2, pre.post.u$Q43_2)
+# pre.post_boxplot_t.test(pre.post$Q43_3,  pre$Q43_3, pre.post.u$Q43_3)
+# pre.post_boxplot_t.test(pre.post$Q43_4,  pre$Q43_4, pre.post.u$Q43_4)
+# pre.post_boxplot_t.test(pre.post$Q43_5,  pre$Q43_5, pre.post.u$Q43_5)
+# pre.post_boxplot_t.test(pre.post$Q43_5,  pre$Q43_5, pre.post.u$Q43_5)
+# pre.post_boxplot_t.test(pre.post$Q45_1.1,  pre$Q45_1.1, pre.post.u$Q45_1.1)
+# pre.post_boxplot_t.test(pre.post$Q45_4.1,  pre$Q45_4.1, pre.post.u$Q45_4.1)
+# pre.post_boxplot_t.test(pre.post$Q49_2,  pre$Q49_2, pre.post.u$Q49_2) 
+# pre.post_boxplot_t.test(pre.post$Q49_4,  pre$Q49_4, pre.post.u$Q49_4) 
+# pre.post_boxplot_t.test(pre.post$Q50_1,  pre$Q50_1, pre.post.u$Q50_1) 
+# pre.post_boxplot_t.test(pre.post$Q50_2,  pre$Q50_2, pre.post.u$Q50_2) 
+# pre.post_boxplot_t.test(pre.post$Q50_4,  pre$Q50_4, pre.post.u$Q50_4) 
+# pre.post_boxplot_t.test(pre.post$Q50_5,  pre$Q50_5, pre.post.u$Q50_5) 
+# pre.post_boxplot_t.test(pre.post$Q50_6,  pre$Q50_6, pre.post.u$Q50_6) 
+# pre.post_boxplot_t.test(pre.post$Q67_1,  pre$Q67_1, pre.post.u$Q67_1) 
+# pre.post_boxplot_t.test(pre.post$Q67_2,  pre$Q67_2, pre.post.u$Q67_2) 
+# pre.post_boxplot_t.test(pre.post$Q67_3,  pre$Q67_3, pre.post.u$Q67_3)
+# pre.post_boxplot_t.test(pre.post$Q67_4,  pre$Q67_4, pre.post.u$Q67_4)
+# pre.post_boxplot_t.test(pre.post$Q67_5,  pre$Q67_5, pre.post.u$Q67_5)
+# pre.post_boxplot_t.test(pre.post$Q67_6,  pre$Q67_6, pre.post.u$Q67_6)
+# pre.post_boxplot_t.test(pre.post$Q67_7,  pre$Q67_7, pre.post.u$Q67_7)
+# pre.post_boxplot_t.test(pre.post$Q67_8,  pre$Q67_8, pre.post.u$Q67_8)
+# pre.post_boxplot_t.test(pre.post$Q67_9,  pre$Q67_9, pre.post.u$Q67_9)
+# pre.post_boxplot_t.test(pre.post$Q67_10,  pre$Q67_10, pre.post.u$Q67_10)
 
 ```
 
-```{r}
-# look at just the post test only questions
-
-
-```
 
